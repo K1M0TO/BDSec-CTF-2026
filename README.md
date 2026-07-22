@@ -10,17 +10,17 @@ Score: 330 pts across 4 solved challges
 
 |#|Challenges|Category|Pts|Solves|Writeup|
 |------|---|---|------|---|---|
-|1|Borrowed Memory|Reverse Engineering|100|100|테스트3|
-|2|Ticketly|Web|100|119|테스트3|
-|3|Easy RE Challenge|Reverse Engineering|80|400|테스트3|
-|3|Admin Portal|Web|50|441|테스트3|
+|1|Borrowed Memory|Reverse Engineering|100|100||
+|2|Ticketly|Web|100|119|[Writeup](https://github.com/K1M0TO/BDSec-CTF-2026/blob/main/02%20Challs/01%20Ticketly/Writeup.md)|
+|3|Easy RE Challenge|Reverse Engineering|80|400||
+|4|Admin Portal|Web|50|441||
 
 ---
 ## 🚧 Not Solved
 
 |#|Challenges|Category|Pts|Solves|Writeup|
 |------|---|---|------|---|---|
-|1|Borrowed Memory|Reverse Engineering|100|100|테스트4|
+|5|Borrowed Memory|Reverse Engineering|100|100||
 
 * 풀지 못했지만 타 writeup을 보며 학습
 
