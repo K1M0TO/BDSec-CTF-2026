@@ -20,16 +20,14 @@ Score: 330 pts across 4 solved challges
 
 |#|Challenges|Category|Pts|Solves|Writeup|
 |------|---|---|------|---|---|
-|5|Borrowed Memory|Reverse Engineering|100|100||
+|5|Borrowed Memory|Reverse Engineering|100|100|[Writeup](https://github.com/K1M0TO/BDSec-CTF-2026/blob/main/02%20Challs/05%20Partner%20Sync/Writeup.md)|
 
-* 풀지 못했지만 타 writeup을 보며 학습
+* 풀지 못했지만 공개된 writeup을 보며 학습
 
 ---
 
 ## 📁 Structure
 ```
 02 Challs/<N> <Challenge Name>/
-├── Writeup.md      # recon, exploitation steps, flag(s), lessons learned
-├── files/          # provided challenge artifacts
-└── solver/         # exploit / solve script(s)
+└── Writeup.md      # recon, exploitation steps, flag(s), lessons learned
 ```
