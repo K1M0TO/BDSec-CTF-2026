@@ -29,5 +29,5 @@ Score: 330 pts across 4 solved challges
 ## 📁 Structure
 ```
 02 Challs/<N> <Challenge Name>/
-└── Writeup.md      # recon, exploitation steps, flag(s), lessons learned
+└── Writeup.md
 ```
